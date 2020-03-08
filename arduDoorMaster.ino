@@ -33,7 +33,7 @@ static void my_callback (byte status, word off, word len) {
   Serial.println(">>>");
   Ethernet::buffer[off+300] = 0;
   Serial.print((const char*) Ethernet::buffer + off);
-  Serial.println("");
+  Serial.println("...");
 }
 
 void setup () {
@@ -53,24 +53,24 @@ void setup () {
 
 
   //uncomment when done
-  //byte hisip[] = { 192,168,25,49 };
-  //ether.copyIp(ether.hisip, hisip);
+  byte hisip[] = { 192,168,25,49 };
+  ether.copyIp(ether.hisip, hisip);
 
 //--------------- remove this block when done --------------
-#if 1
-  // use DNS to resolve the website's IP address
-  if (!ether.dnsLookup(website))
-    Serial.println("DNS failed");    
-#elif 2
-  // if website is a string containing an IP address instead of a domain name,
-  // then use it directly. Note: the string can not be in PROGMEM.
-  char websiteIP[] = "192.168.1.1";
-  ether.parseIp(ether.hisip, websiteIP);
-#else
-  // or provide a numeric IP address instead of a string
-  byte hisip[] = { 192,168,1,1 };
-  ether.copyIp(ether.hisip, hisip);
-#endif
+// #if 1
+//   // use DNS to resolve the website's IP address
+//   if (!ether.dnsLookup(website))
+//     Serial.println("DNS failed");    
+// #elif 2
+//   // if website is a string containing an IP address instead of a domain name,
+//   // then use it directly. Note: the string can not be in PROGMEM.
+//   char websiteIP[] = "192.168.1.1";
+//   ether.parseIp(ether.hisip, websiteIP);
+// #else
+//   // or provide a numeric IP address instead of a string
+//   byte hisip[] = { 192,168,1,1 };
+//   ether.copyIp(ether.hisip, hisip);
+// #endif
 //----------------------------------------------------------
 
 
@@ -117,11 +117,18 @@ void loop () {
       Serial.println("The opened door is closing now.");
     }
     
-    Serial.println("Sending (" + requestArg + ") to the Slave Arduino.");
-    
+    Serial.println("Sending (" + requestArg + ") to the Slave Arduino.");    
+        
     Serial.println();
-    Serial.print("<<< RESPONSE FROM SLAVE ");    
-    ether.browseUrl(PSTR("/v2/"), "5e5bfa793000009975f9f305",website, my_callback);
+    Serial.print("<<< RESPONSE FROM SLAVE ");   
+    
+    if (requestArg == "masterdoor=closing"){
+      ether.browseUrl(PSTR("/"), "?masterdoor=closing", website, my_callback);   
+    }
+    else if(requestArg == "masterdoor=opening"){
+      ether.browseUrl(PSTR("/"), "?masterdoor=opening", website, my_callback);   
+    }  
+    
     //ether.browseUrl(PSTR("/?/"), requestArg, website, my_callback);
     buttonPressed = false;
   }
